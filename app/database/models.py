@@ -1,5 +1,5 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Float
-from app.database.db import Base
+from sqlalchemy import Column, Integer, String
+from database.db import Base
 
 
 class User(Base):
@@ -13,15 +13,5 @@ class User(Base):
     activity = Column(Integer)
     city = Column(String)
     calories = Column(Integer)
+    gender = Column(String)
 
-
-class Profile(Base):
-    __tablename__ = "profiles"
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"))
-    weight = Column(Float)
-    height = Column(Float)
-    age = Column(Integer)
-    activity = Column(String)
-    city = Column(String)
-    calories = Column(Integer)

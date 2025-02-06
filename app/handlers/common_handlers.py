@@ -1,7 +1,7 @@
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import CallbackContext, ConversationHandler
 from strings import (
-    WELCOME_TEXT, CANCEL_MESSAGE, BACK_NOT_POSSIBLE,
+    WELCOME_TEXT, CANCEL_MESSAGE, BACK_NOT_POSSIBLE, START_BUTTON
 )
 
 
@@ -19,6 +19,17 @@ async def cancel_handler(update: Update, context: CallbackContext) -> int:
 
 
 async def start_handler(update: Update, context: CallbackContext):
-    keyboard = [[InlineKeyboardButton("Создать профиль", callback_data='set_profile')]]
-    reply_markup = InlineKeyboardMarkup(keyboard)
+    context.user_data.clear()
+    reply_markup = ReplyKeyboardMarkup([[START_BUTTON]], one_time_keyboard=True)
     await update.message.reply_text(WELCOME_TEXT, reply_markup=reply_markup)
+    return ConversationHandler.END
+
+
+async def view_profile_handler(update: Update, context: CallbackContext):
+    # Здесь будет логика для отображения профиля пользователя
+    await update.message.reply_text("Ваш профиль: ...")
+
+
+async def delete_profile_handler(update: Update, context: CallbackContext):
+    # Здесь будет логика для удаления профиля пользователя
+    await update.message.reply_text("Ваш профиль удален.")

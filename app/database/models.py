@@ -14,4 +14,3 @@ class User(Base):
     city = Column(String)
     calories = Column(Integer)
     gender = Column(String)
-

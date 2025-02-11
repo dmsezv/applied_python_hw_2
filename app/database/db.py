@@ -14,13 +14,13 @@ Base = declarative_base()
 
 
 @contextmanager
-def get_db() -> Iterator[Session]:
-    db = SessionLocal()
+def get_session() -> Iterator[Session]:
+    session = SessionLocal()
     try:
-        yield db
-        db.commit()
+        yield session
+        session.commit()
     except Exception:
-        db.rollback()
+        session.rollback()
         raise
     finally:
-        db.close()
+        session.close()

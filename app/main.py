@@ -8,17 +8,29 @@ from handlers.set_profile_handlers import (
     activity_handler, city_handler, calories_handler, gender_handler
 )
 from handlers.set_profile_handlers import WEIGHT, HEIGHT, AGE, ACTIVITY, CITY, CALORIES, GENDER
-from handlers.common_handlers import back_handler, cancel_handler, start_handler, view_profile_handler, delete_profile_handler
-from strings import START_BUTTON
+
+from handlers.user_profile_handlers import view_profile_handler, delete_profile_handler
+
+from handlers.common_handlers import start_handler
+from strings import (
+    CREATE_PROFILE_BUTTON_LABEL, SHOW_PROFILE_BUTTON_LABEL,
+    DELETE_PROFILE_BUTTON_LABEL, EDIT_PROFILE_BUTTON_LABEL
+)
 
 
 def main():
-    app = ApplicationBuilder().token(BOT_TOKEN).build()
+    app = ApplicationBuilder() \
+        .token(BOT_TOKEN) \
+        .read_timeout(10) \
+        .write_timeout(10) \
+        .build()
 
     set_profile_handler = ConversationHandler(
         entry_points=[
             CommandHandler("set_profile", set_profile_start),
-            MessageHandler(filters.Regex(f"^{START_BUTTON}$"), set_profile_start)
+            MessageHandler(filters.Regex(f"^{CREATE_PROFILE_BUTTON_LABEL}$"), set_profile_start),
+            CommandHandler("edit_profile", set_profile_start),
+            MessageHandler(filters.Regex(f"^{EDIT_PROFILE_BUTTON_LABEL}$"), set_profile_start),
         ],
         states={
             WEIGHT: [
@@ -47,16 +59,27 @@ def main():
         },
         fallbacks=[
             CommandHandler("start", start_handler),
-            CommandHandler("cancel", cancel_handler),
-            CommandHandler("back", back_handler)
         ],
         allow_reentry=True
     )
 
+    user_profile_handler = ConversationHandler(
+        entry_points=[
+            CommandHandler("view_profile", view_profile_handler),
+            MessageHandler(filters.Regex(f"^{SHOW_PROFILE_BUTTON_LABEL}$"), view_profile_handler),
+            CommandHandler("delete_profile", delete_profile_handler),
+            MessageHandler(filters.Regex(f"^{DELETE_PROFILE_BUTTON_LABEL}$"), delete_profile_handler)
+        ],
+        states={},
+        fallbacks=[
+            CommandHandler("start", start_handler),
+        ],
+        allow_reentry=False
+    )
+
     app.add_handler(CommandHandler("start", start_handler))
     app.add_handler(set_profile_handler)
-    app.add_handler(CallbackQueryHandler(view_profile_handler, pattern='^view_profile$'))
-    app.add_handler(CallbackQueryHandler(delete_profile_handler, pattern='^delete_profile$'))
+    app.add_handler(user_profile_handler)
     app.run_polling()
 
 

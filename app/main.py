@@ -5,9 +5,9 @@ from config import BOT_TOKEN
 
 from handlers.set_profile_handlers import (
     set_profile_start, weight_handler, height_handler, age_handler,
-    activity_handler, city_handler, calories_handler, gender_handler
+    activity_handler, city_handler, gender_handler
 )
-from handlers.set_profile_handlers import WEIGHT, HEIGHT, AGE, ACTIVITY, CITY, CALORIES, GENDER
+from handlers.set_profile_handlers import WEIGHT, HEIGHT, AGE, ACTIVITY, CITY, GENDER
 
 from handlers.user_profile_handlers import view_profile_handler, delete_profile_handler
 
@@ -47,10 +47,6 @@ def main():
             ],
             CITY: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, city_handler),
-            ],
-            CALORIES: [
-                CallbackQueryHandler(calories_handler),
-                MessageHandler(filters.TEXT & ~filters.COMMAND, calories_handler),
             ],
             GENDER: [
                 CallbackQueryHandler(gender_handler),

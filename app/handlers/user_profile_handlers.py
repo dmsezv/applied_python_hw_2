@@ -18,8 +18,9 @@ async def view_profile_handler(update: Update, context: CallbackContext):
                 age=user.age,
                 activity=user.activity,
                 city=user.city,
-                calories=user.calories,
-                gender=user.gender
+                gender=user.gender,
+                water_goal=user.water_goal,
+                calories_goal=user.calories_goal
             )
         )
     else:

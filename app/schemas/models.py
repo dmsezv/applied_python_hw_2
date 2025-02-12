@@ -14,13 +14,10 @@ class User(BaseSchema):
     age: int
     activity: int
     city: str
-    calories: float | None = None
     gender: str
+    water_goal: float
+    calories_goal: float
 
     @field_validator("gender")
     def transform_gender(cls, v):
         return GENDER_MAN if v == "M" else GENDER_WOMAN
-
-    @field_validator("calories")
-    def transform_calories(cls, v):
-        return "🤷‍♂️" if v is None else v

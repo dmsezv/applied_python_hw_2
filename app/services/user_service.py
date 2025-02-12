@@ -2,12 +2,14 @@ from database.db import get_session
 from database.models import User as UserModel
 from schemas.models import User
 from sqlalchemy import select
+from datetime import datetime
 
 
 class UserService:
     def update_user(
         self, username: str, weight: int, height: int, age: int,
-        activity: int, city: str, calories: int, gender: str
+        activity: int, city: str, gender: str,
+        water_goal: int, calories_goal: int
     ) -> User:
         with get_session() as session:
             try:
@@ -18,8 +20,10 @@ class UserService:
                     user.age = age
                     user.activity = activity
                     user.city = city
-                    user.calories = calories
                     user.gender = gender
+                    user.water_goal = water_goal
+                    user.calories_goal = calories_goal
+                    user.updated_at = datetime.utcnow()
                 else:
                     user = UserModel(
                         username=username,
@@ -28,13 +32,16 @@ class UserService:
                         age=age,
                         activity=activity,
                         city=city,
-                        calories=calories,
-                        gender=gender
+                        gender=gender,
+                        water_goal=water_goal,
+                        calories_goal=calories_goal,
+                        created_at=datetime.utcnow(),
+                        updated_at=datetime.utcnow()
                     )
                     session.add(user)
                 session.commit()
                 session.refresh(user)
-                return user
+                return User(**user.__dict__)
             except Exception as e:
                 print(f"Ошибка при сохранении пользователя: {e}")
                 return None

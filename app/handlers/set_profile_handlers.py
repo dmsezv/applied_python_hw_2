@@ -1,21 +1,23 @@
 from telegram import Update, InlineKeyboardMarkup, ReplyKeyboardMarkup
 from telegram.ext import CallbackContext, ConversationHandler
 from strings import (
-    WEIGHT_TEXT, WEIGHT_TEXT_SAVED, WEIGHT_TYPE_ERROR, WEIGHT_ZERO_ERROR,
-    HEIGHT_TEXT, HEIGHT_TEXT_SAVED, HEIGHT_TYPE_ERROR, HEIGHT_ZERO_ERROR,
-    AGE_TEXT, AGE_TEXT_SAVED, AGE_TYPE_ERROR, AGE_ZERO_ERROR,
-    ACTIVITY_TEXT, ACTIVITY_TEXT_SAVED, ACTIVITY_TYPE_ERROR, ACTIVITY_ZERO_ERROR,
-    CITY_TEXT, CITY_TEXT_SAVED, CITY_TYPE_ERROR,
-    CALORIES_TEXT, CALORIES_TEXT_SAVED, CALORIES_TYPE_ERROR, CALORIES_ZERO_ERROR,
-    PROFILE_UPDATED, PROFILE_ERROR,
     HELLO_TEXT,
-    GENDER_TEXT, GENDER_TEXT_SAVED, GENDER_TYPE_ERROR,
-    GENDER_MAN, GENDER_WOMAN
+    WEIGHT_TEXT, WEIGHT_TEXT_SAVED, WEIGHT_TYPE_ERROR, WEIGHT_ZERO_ERROR,
+    HEIGHT_TEXT_SAVED, HEIGHT_TYPE_ERROR, HEIGHT_ZERO_ERROR,
+    AGE_TEXT_SAVED, AGE_TYPE_ERROR, AGE_ZERO_ERROR,
+    ACTIVITY_TEXT_SAVED, ACTIVITY_TYPE_ERROR, ACTIVITY_ZERO_ERROR,
+    CITY_TEXT_SAVED, CITY_TYPE_ERROR,
+    PROFILE_UPDATED, PROFILE_ERROR, PROFILE_SAVING_IN_PROGRESS,
+    GENDER_TEXT_SAVED, GENDER_TYPE_ERROR, GENDER_MAN, GENDER_WOMAN, 
+    CITY_ERROR, CITY_WEATHER_IN_PROGRESS
 )
-from components.buttons import MAN_WOMAN_INLINE_BUTTONS, SKIP_INLINE_BUTTON, MAIN_MENU_BUTTONS
+from components.buttons import MAN_WOMAN_INLINE_BUTTONS, MAIN_MENU_BUTTONS
 from services.user_service import UserService
+from services.goals_service import GoalsService
+from services.weather_service import WeatherService
 
-WEIGHT, HEIGHT, AGE, ACTIVITY, CITY, CALORIES, GENDER = range(7)
+
+WEIGHT, HEIGHT, AGE, ACTIVITY, CITY, GENDER = range(6)
 
 
 async def set_profile_start(update: Update, context: CallbackContext) -> int:
@@ -101,9 +103,24 @@ async def city_handler(update: Update, context: CallbackContext) -> int:
         await update.message.reply_text(CITY_TYPE_ERROR)
         return CITY
 
+    await update.message.reply_text(CITY_WEATHER_IN_PROGRESS.format(city=city))
+    weather_service = WeatherService()
+    temperature = await weather_service.get_weather(city)
+
+    if temperature is None:
+        await update.message.reply_text(CITY_ERROR)
+        return CITY
+
     context.user_data["city"] = update.message.text
+    context.user_data["temperature"] = temperature
     reply_markup = InlineKeyboardMarkup(MAN_WOMAN_INLINE_BUTTONS)
-    await update.message.reply_text(CITY_TEXT_SAVED.format(city=update.message.text), reply_markup=reply_markup)
+    await update.message.reply_text(
+        CITY_TEXT_SAVED.format(
+            city=update.message.text,
+            temperature=temperature
+        ),
+        reply_markup=reply_markup
+    )
     context.user_data["current_state"] = GENDER
     return GENDER
 
@@ -122,62 +139,57 @@ async def gender_handler(update: Update, context: CallbackContext) -> int:
             await query.message.reply_text(GENDER_TYPE_ERROR, reply_markup=reply_markup)
             return GENDER
 
-        reply_markup = InlineKeyboardMarkup(SKIP_INLINE_BUTTON)
         await query.message.reply_text(
             GENDER_TEXT_SAVED.format(
                 gender=GENDER_MAN if query.data == "M" else GENDER_WOMAN
-            ),
-            reply_markup=reply_markup
+            )
         )
+
+        await query.message.reply_text(PROFILE_SAVING_IN_PROGRESS)
+
+        user = update_user_profile(update, context)
+
+        if user is None:
+            await query.message.reply_text(PROFILE_ERROR)
+            return GENDER
+
+        reply_markup = ReplyKeyboardMarkup(MAIN_MENU_BUTTONS, one_time_keyboard=True)
+        await query.message.reply_text(PROFILE_UPDATED.format(
+            temperature=context.user_data["temperature"],
+            city=context.user_data["city"],
+            calories_goal=user.calories_goal,
+            water_goal=user.water_goal
+        ), reply_markup=reply_markup)
+        context.user_data.clear()
+        return ConversationHandler.END
     else:
         reply_markup = InlineKeyboardMarkup(MAN_WOMAN_INLINE_BUTTONS)
         await update.message.reply_text(GENDER_TYPE_ERROR, reply_markup=reply_markup)
         return GENDER
 
-    context.user_data["current_state"] = CALORIES
-    return CALORIES
 
+def update_user_profile(update: Update, context: CallbackContext) -> int:
+    goals_service = GoalsService()
+    water_goal = goals_service.calculate_water_goal(
+        weight=float(context.user_data["weight"]),
+        activity_minutes=int(context.user_data["activity"]),
+        temperature=float(context.user_data["temperature"])
+    )
+    calories_goal = goals_service.calculate_calories_goal(
+        weight=float(context.user_data["weight"]),
+        height=float(context.user_data["height"]),
+        age=int(context.user_data["age"]),
+        activity_level=int(context.user_data["activity"])
+    )
 
-async def calories_handler(update: Update, context: CallbackContext) -> int:
-    if update.callback_query:
-        query = update.callback_query
-        await query.answer()
-        context.user_data["calories"] = None
-    else:
-        try:
-            calories = float(update.message.text)
-            if calories <= 0:
-                await update.message.reply_text(CALORIES_ZERO_ERROR)
-                return CALORIES
-            context.user_data["calories"] = calories
-        except ValueError:
-            await update.message.reply_text(CALORIES_TYPE_ERROR)
-            return CALORIES
-
-    user = UserService().update_user(
+    return UserService().update_user(
         username=context.user_data["username"],
         weight=context.user_data["weight"],
         height=context.user_data["height"],
         age=context.user_data["age"],
         activity=context.user_data["activity"],
         city=context.user_data["city"],
-        calories=context.user_data["calories"],
-        gender=context.user_data["gender"]
+        gender=context.user_data["gender"],
+        water_goal=water_goal,
+        calories_goal=calories_goal
     )
-
-    reply_markup = ReplyKeyboardMarkup(MAIN_MENU_BUTTONS, one_time_keyboard=True)
-
-    if user is None:
-        if update.callback_query:
-            await update.callback_query.message.reply_text(PROFILE_ERROR)
-        else:
-            await update.message.reply_text(PROFILE_ERROR)
-        return CALORIES
-
-    if update.callback_query:
-        await update.callback_query.message.reply_text(PROFILE_UPDATED, reply_markup=reply_markup)
-    else:
-        await update.message.reply_text(PROFILE_UPDATED, reply_markup=reply_markup)
-
-    context.user_data.clear()
-    return ConversationHandler.END

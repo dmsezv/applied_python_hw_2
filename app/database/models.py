@@ -23,6 +23,7 @@ class User(Base):
 class Statistics(Base):
     __tablename__ = "statistics"
 
+    id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"))
     water = Column(Float)
     food = Column(Float)

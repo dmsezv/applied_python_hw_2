@@ -11,7 +11,7 @@ from strings import (
     GENDER_TEXT_SAVED, GENDER_TYPE_ERROR, GENDER_MAN, GENDER_WOMAN, 
     CITY_ERROR, CITY_WEATHER_IN_PROGRESS
 )
-from components.buttons import MAN_WOMAN_INLINE_BUTTONS, MAIN_MENU_BUTTONS
+from components.buttons import MAN_WOMAN_INLINE_BUTTONS, MAIN_MENU_BUTTONS, CANCEL_BUTTON
 from services.user_service import UserService
 from services.goals_service import GoalsService
 from services.weather_service import WeatherService
@@ -24,7 +24,8 @@ async def set_profile_start(update: Update, context: CallbackContext) -> int:
     username = update.message.from_user.username
     context.user_data["username"] = username
     message = f"{HELLO_TEXT.format(username=username)}\n\n{WEIGHT_TEXT}"
-    await update.message.reply_text(message)
+    reply_markup = ReplyKeyboardMarkup(CANCEL_BUTTON)
+    await update.message.reply_text(message, reply_markup=reply_markup)
     context.user_data["current_state"] = WEIGHT
     return WEIGHT
 

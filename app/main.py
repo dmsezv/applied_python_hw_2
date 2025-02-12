@@ -10,12 +10,13 @@ from handlers.set_profile_handlers import (
 from handlers.set_profile_handlers import WEIGHT, HEIGHT, AGE, ACTIVITY, CITY, GENDER
 
 from handlers.user_profile_handlers import view_profile_handler, delete_profile_handler, update_goals_handler
-
-from handlers.common_handlers import start_handler
+from handlers.statistics_handlers import start_statistics_handler
+from handlers.common_handlers import start_handler, main_menu_handler
 from strings import (
     CREATE_PROFILE_BUTTON_LABEL, SHOW_PROFILE_BUTTON_LABEL,
     DELETE_PROFILE_BUTTON_LABEL, EDIT_PROFILE_BUTTON_LABEL,
-    UPDATE_GOALS_BUTTON_LABEL
+    UPDATE_GOALS_BUTTON_LABEL, STATISTICS_BUTTON_LABEL, BACK_BUTTON_LABEL, 
+    CANCEL_BUTTON_LABEL
 )
 
 
@@ -32,24 +33,31 @@ def main():
             MessageHandler(filters.Regex(f"^{CREATE_PROFILE_BUTTON_LABEL}$"), set_profile_start),
             CommandHandler("edit_profile", set_profile_start),
             MessageHandler(filters.Regex(f"^{EDIT_PROFILE_BUTTON_LABEL}$"), set_profile_start),
+            MessageHandler(filters.Regex(f"^{CANCEL_BUTTON_LABEL}$"), start_handler),
         ],
         states={
             WEIGHT: [
+                MessageHandler(filters.Regex(f"^{CANCEL_BUTTON_LABEL}$"), start_handler),
                 MessageHandler(filters.TEXT & ~filters.COMMAND, weight_handler),
             ],
             HEIGHT: [
+                MessageHandler(filters.Regex(f"^{CANCEL_BUTTON_LABEL}$"), start_handler),
                 MessageHandler(filters.TEXT & ~filters.COMMAND, height_handler),
             ],
             AGE: [
+                MessageHandler(filters.Regex(f"^{CANCEL_BUTTON_LABEL}$"), start_handler),
                 MessageHandler(filters.TEXT & ~filters.COMMAND, age_handler),
             ],
             ACTIVITY: [
+                MessageHandler(filters.Regex(f"^{CANCEL_BUTTON_LABEL}$"), start_handler),
                 MessageHandler(filters.TEXT & ~filters.COMMAND, activity_handler),
             ],
             CITY: [
+                MessageHandler(filters.Regex(f"^{CANCEL_BUTTON_LABEL}$"), start_handler),
                 MessageHandler(filters.TEXT & ~filters.COMMAND, city_handler),
             ],
             GENDER: [
+                MessageHandler(filters.Regex(f"^{CANCEL_BUTTON_LABEL}$"), start_handler),
                 CallbackQueryHandler(gender_handler),
                 MessageHandler(filters.TEXT & ~filters.COMMAND, gender_handler),
             ]
@@ -57,7 +65,7 @@ def main():
         fallbacks=[
             CommandHandler("start", start_handler),
         ],
-        allow_reentry=True
+        allow_reentry=False
     )
 
     user_profile_handler = ConversationHandler(
@@ -76,9 +84,22 @@ def main():
         allow_reentry=False
     )
 
+    statistics_handler = ConversationHandler(
+        entry_points=[
+            CommandHandler("statistics", start_statistics_handler),
+            MessageHandler(filters.Regex(f"^{STATISTICS_BUTTON_LABEL}$"), start_statistics_handler),
+            MessageHandler(filters.Regex(f"^{BACK_BUTTON_LABEL}$"), main_menu_handler),
+        ],
+        states={},
+        fallbacks=[
+            CommandHandler("start", start_handler),
+        ],
+        allow_reentry=False
+    )
     app.add_handler(CommandHandler("start", start_handler))
     app.add_handler(set_profile_handler)
     app.add_handler(user_profile_handler)
+    app.add_handler(statistics_handler)
     app.run_polling()
 
 

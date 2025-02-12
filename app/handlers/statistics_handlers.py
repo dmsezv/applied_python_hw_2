@@ -1,16 +1,24 @@
 from services.statistics_service import StatisticsService
-from telegram import Update, InlineKeyboardMarkup
+from telegram import Update, InlineKeyboardMarkup, ReplyKeyboardMarkup
 from telegram.ext import CallbackContext, ConversationHandler
 from strings import (
     CHECK_PROGRESS, CHECK_PROGRESS_ERROR,
     FOOD_GET_TEXT, FOOD_FOUND_TEXT, FOOD_NOT_FOUND_TEXT, FOOD_ADD_TEXT, FOOD_NOT_ADDED_TEXT,
+    STATISTICS_TEXT
 )
 from services.food_service import FoodService
-from components.buttons import YES_NO_INLINE_BUTTON
+from components.buttons import (
+    YES_NO_INLINE_BUTTON, STATISTICS_MENU_BUTTONS
+)
 from datetime import date
 
 
 FOOD_GET, FOOD_SET, FOOD_ADD = range(3)
+
+
+async def start_statistics_handler(update: Update, context: CallbackContext):
+    keyboard = ReplyKeyboardMarkup(STATISTICS_MENU_BUTTONS)
+    await update.message.reply_text(STATISTICS_TEXT, reply_markup=keyboard)
 
 
 async def get_daily_statistics_handler(update: Update, context: CallbackContext):

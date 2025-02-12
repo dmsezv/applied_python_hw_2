@@ -36,7 +36,7 @@ class Food(Base):
     __tablename__ = "foods"
 
     id = Column(Integer, primary_key=True, index=True)
-    request = Column(String)
+    request = Column(String, unique=True)
     title = Column(String)
     calories = Column(Float)
     created_at = Column(DateTime, default=datetime.utcnow)

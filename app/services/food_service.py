@@ -1,20 +1,21 @@
 import aiohttp
 from sqlalchemy import select
-from database.models import Food as FoodModel
+from database.models import Food as FoodModel, User as UserModel, Statistics as StatisticsModel
 from schemas.models import Food
 from database.db import get_session
+from datetime import datetime, date
 
 
 class FoodService:
     def __init__(self):
         self.base_url = "https://world.openfoodfacts.org/cgi/search.pl"
 
-    async def get_food_info(self, product_name):
-        food = self._check_food_in_db(product_name)
+    async def get_food_info(self, request):
+        food = self._check_food_in_db(request)
         if food:
             return food
 
-        url = f"{self.base_url}?action=process&search_terms={product_name}&json=true"
+        url = f"{self.base_url}?action=process&search_terms={request}&json=true"
 
         async with aiohttp.ClientSession() as session:
             async with session.get(url) as response:
@@ -27,11 +28,12 @@ class FoodService:
                         calories = first_product.get("nutriments", {}).get("energy-kcal_100g")
                         if product_name and calories:
                             food = Food(
-                                request=product_name,
+                                request=request,
                                 title=product_name,
                                 calories=calories,
                             )
-                            return self._save_food_to_db(food)
+                            self._save_food_to_db(food)
+                            return food
                         else:
                             return None
                 else:
@@ -41,7 +43,7 @@ class FoodService:
     def _check_food_in_db(self, product_name):
         with get_session() as session:
             stmt = select(FoodModel).where(FoodModel.request == product_name)
-            result = session.execute(stmt).scalar_one_or_none()
+            result = session.execute(stmt).scalars().first()
             if result:
                 return Food(
                     request=result.request,
@@ -52,11 +54,20 @@ class FoodService:
 
     def _save_food_to_db(self, food: Food):
         with get_session() as session:
-            session.add(FoodModel(
-                request=food.request,
-                title=food.title,
-                calories=food.calories
-            ))
-            session.commit()
-            session.refresh(food)
-            return food
+            try:
+                stmt = select(FoodModel).where(FoodModel.request == food.request)
+                result = session.execute(stmt).scalar_one_or_none()
+
+                if result:
+                    return
+
+                food_model = FoodModel(
+                    request=food.request,
+                    title=food.title,
+                    calories=food.calories
+                )
+                session.add(food_model)
+                session.commit()
+                session.refresh(food_model)
+            except Exception as e:
+                print(f"Ошибка при сохранении продукта в базу данных: {e}")

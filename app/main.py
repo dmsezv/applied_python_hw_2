@@ -10,12 +10,21 @@ from handlers.set_profile_handlers import (
 from handlers.set_profile_handlers import WEIGHT, HEIGHT, AGE, ACTIVITY, CITY, GENDER
 
 from handlers.user_profile_handlers import view_profile_handler, delete_profile_handler, update_goals_handler
-from handlers.statistics_handlers import start_statistics_handler
+
+from handlers.statistics_handlers import (
+    start_statistics_handler, get_daily_statistics_handler, 
+    get_workout_handler, get_water_handler,
+    get_food_handler, set_food_handler, add_food_handler, get_calories_count_handler
+)
+from handlers.statistics_handlers import FOOD_GET, FOOD_SET, FOOD_ADD, FOOD_CALORIES_COUNT
+
 from handlers.common_handlers import start_handler, main_menu_handler
+
 from strings import (
     CREATE_PROFILE_BUTTON_LABEL, SHOW_PROFILE_BUTTON_LABEL,
     DELETE_PROFILE_BUTTON_LABEL, EDIT_PROFILE_BUTTON_LABEL,
-    UPDATE_GOALS_BUTTON_LABEL, STATISTICS_BUTTON_LABEL, BACK_BUTTON_LABEL, 
+    UPDATE_GOALS_BUTTON_LABEL, STATISTICS_BUTTON_LABEL, BACK_BUTTON_LABEL,
+    DAILY_STATISTICS_BUTTON_LABEL, LOG_FOOD_BUTTON_LABEL, LOG_WORKOUT_BUTTON_LABEL, LOG_WATER_BUTTON_LABEL,
     CANCEL_BUTTON_LABEL
 )
 
@@ -33,7 +42,6 @@ def main():
             MessageHandler(filters.Regex(f"^{CREATE_PROFILE_BUTTON_LABEL}$"), set_profile_start),
             CommandHandler("edit_profile", set_profile_start),
             MessageHandler(filters.Regex(f"^{EDIT_PROFILE_BUTTON_LABEL}$"), set_profile_start),
-            MessageHandler(filters.Regex(f"^{CANCEL_BUTTON_LABEL}$"), start_handler),
         ],
         states={
             WEIGHT: [
@@ -88,9 +96,31 @@ def main():
         entry_points=[
             CommandHandler("statistics", start_statistics_handler),
             MessageHandler(filters.Regex(f"^{STATISTICS_BUTTON_LABEL}$"), start_statistics_handler),
+            MessageHandler(filters.Regex(f"^{DAILY_STATISTICS_BUTTON_LABEL}$"), get_daily_statistics_handler),
+            MessageHandler(filters.Regex(f"^{LOG_FOOD_BUTTON_LABEL}$"), get_food_handler),
+            MessageHandler(filters.Regex(f"^{LOG_WATER_BUTTON_LABEL}$"), get_water_handler),
+            MessageHandler(filters.Regex(f"^{LOG_WORKOUT_BUTTON_LABEL}$"), get_workout_handler),
             MessageHandler(filters.Regex(f"^{BACK_BUTTON_LABEL}$"), main_menu_handler),
         ],
-        states={},
+        states={
+            FOOD_GET: [
+                MessageHandler(filters.Regex(f"^{CANCEL_BUTTON_LABEL}$"), start_statistics_handler),
+                MessageHandler(filters.TEXT & ~filters.COMMAND, get_food_handler),
+            ],
+            FOOD_SET: [
+                MessageHandler(filters.Regex(f"^{CANCEL_BUTTON_LABEL}$"), start_statistics_handler),
+                MessageHandler(filters.TEXT & ~filters.COMMAND, set_food_handler),
+            ],
+            FOOD_ADD: [
+                MessageHandler(filters.Regex(f"^{CANCEL_BUTTON_LABEL}$"), start_statistics_handler),
+                CallbackQueryHandler(add_food_handler),
+                MessageHandler(filters.TEXT & ~filters.COMMAND, add_food_handler),
+            ],
+            FOOD_CALORIES_COUNT: [
+                MessageHandler(filters.Regex(f"^{CANCEL_BUTTON_LABEL}$"), start_statistics_handler),
+                MessageHandler(filters.TEXT & ~filters.COMMAND, get_calories_count_handler),
+            ],
+        },
         fallbacks=[
             CommandHandler("start", start_handler),
         ],

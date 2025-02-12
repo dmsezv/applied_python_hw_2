@@ -46,19 +46,57 @@ class StatisticsService:
                 )
                 statistics = session.execute(stmt).scalar_one_or_none()
                 if statistics:
+                    water_left = user.water_goal - statistics.water
+                    calories_left = user.calories_goal - (statistics.food - statistics.workout)
                     return UserStatistic(
+                        user_id=user.id,
                         water=statistics.water,
                         food=statistics.food,
                         workout=statistics.workout,
-                        water_left=user.water_goal - statistics.water,
-                        food_left=user.calories_goal - (statistics.food - statistics.workout),
-                    ), user
+                        water_left=water_left,
+                        food_left=calories_left
+                    ), User(**user.__dict__)
                 else:
                     return UserStatistic(
+                        user_id=0,
                         water=0,
                         food=0,
                         workout=0,
                         water_left=user.water_goal,
                         food_left=user.calories_goal
-                    ), user
+                    ), User(**user.__dict__)
             return None, None
+
+    def add_food_to_statistics(self, username, calories):
+        with get_session() as session:
+            try:
+                user = session.execute(select(UserModel).where(UserModel.username == username)).scalar_one()
+                if not user:
+                    return False
+                today_start = datetime.combine(date.today(), datetime.min.time())
+                today_end = datetime.combine(date.today(), datetime.max.time())
+                stmt = select(StatisticsModel).where(
+                    StatisticsModel.user_id == user.id,
+                    StatisticsModel.created_at >= today_start,
+                    StatisticsModel.created_at <= today_end
+                )
+                statistics = session.execute(stmt).scalar_one_or_none()
+                if statistics:
+                    statistics.food += calories
+                    session.commit()
+                else:
+                    statistics = StatisticsModel(
+                        user_id=user.id,
+                        food=calories,
+                        water=0,
+                        workout=0,
+                        updated_at=datetime.now(),
+                        created_at=datetime.now()
+                    )
+                    session.add(statistics)
+                    session.commit()
+                    session.refresh(statistics)
+                return True
+            except Exception as e:
+                print(f"Ошибка при добавлении продукта в статистику: {e}")
+                return False

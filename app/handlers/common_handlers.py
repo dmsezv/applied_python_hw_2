@@ -14,6 +14,7 @@ async def start_handler(update: Update, context: CallbackContext):
 
 
 async def main_menu_handler(update: Update, context: CallbackContext):
+    context.user_data.clear()
     keyboard = ReplyKeyboardMarkup(MAIN_MENU_BUTTONS)
     await update.message.reply_text(WHATS_NEXT_TEXT, reply_markup=keyboard)
     return ConversationHandler.END

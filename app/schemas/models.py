@@ -30,3 +30,9 @@ class UserStatistic(BaseSchema):
     workout: float
     water_left: float
     food_left: float
+
+
+class Food(BaseSchema):
+    request: str
+    title: str
+    calories: float

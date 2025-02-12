@@ -169,3 +169,7 @@ cython_debug/
 .vscode/
 # PyPI configuration file
 .pypirc
+
+containers/
+.DS_Store
+*.tar

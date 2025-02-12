@@ -9,12 +9,13 @@ from handlers.set_profile_handlers import (
 )
 from handlers.set_profile_handlers import WEIGHT, HEIGHT, AGE, ACTIVITY, CITY, GENDER
 
-from handlers.user_profile_handlers import view_profile_handler, delete_profile_handler
+from handlers.user_profile_handlers import view_profile_handler, delete_profile_handler, update_goals_handler
 
 from handlers.common_handlers import start_handler
 from strings import (
     CREATE_PROFILE_BUTTON_LABEL, SHOW_PROFILE_BUTTON_LABEL,
-    DELETE_PROFILE_BUTTON_LABEL, EDIT_PROFILE_BUTTON_LABEL
+    DELETE_PROFILE_BUTTON_LABEL, EDIT_PROFILE_BUTTON_LABEL, 
+    UPDATE_GOALS_BUTTON_LABEL
 )
 
 
@@ -64,7 +65,9 @@ def main():
             CommandHandler("view_profile", view_profile_handler),
             MessageHandler(filters.Regex(f"^{SHOW_PROFILE_BUTTON_LABEL}$"), view_profile_handler),
             CommandHandler("delete_profile", delete_profile_handler),
-            MessageHandler(filters.Regex(f"^{DELETE_PROFILE_BUTTON_LABEL}$"), delete_profile_handler)
+            MessageHandler(filters.Regex(f"^{DELETE_PROFILE_BUTTON_LABEL}$"), delete_profile_handler),
+            CommandHandler("update_goals", update_goals_handler),
+            MessageHandler(filters.Regex(f"^{UPDATE_GOALS_BUTTON_LABEL}$"), update_goals_handler)
         ],
         states={},
         fallbacks=[

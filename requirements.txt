@@ -1,0 +1,7 @@
+python-telegram-bot==20.0
+python-dotenv
+sqlalchemy
+psycopg2-binary
+pydantic
+flake8 
+aiohttp

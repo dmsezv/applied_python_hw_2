@@ -1,0 +1,7 @@
+services:
+  myapp:
+    build: .
+    container_name: applied_python_hw_2
+    env_file:
+      - .env
+    restart: always

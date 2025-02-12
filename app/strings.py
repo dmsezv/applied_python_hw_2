@@ -69,16 +69,16 @@ LOG_WORKOUT_SUCCESS = (
 )
 LOG_WORKOUT_ERROR = "Пожалуйста, укажите тип тренировки и время в минутах."
 CHECK_PROGRESS = (
-    "📊 Прогресс:\n"
+    "📊 Прогресс за сегодня ({date}):\n"
     "Вода:\n"
-    "- Выпито: {water_consumed} мл из {water_goal} мл.\n"
-    "- Осталось: {water_goal - water_consumed} мл.\n\n"
+    "- Выпито: {water} мл из {water_goal} мл.\n"
+    "- Осталось: {water_left} мл.\n\n"
     "Калории:\n"
-    "- Потреблено: {calories_consumed} ккал из {calories_goal} ккал.\n"
-    "- Сожжено: {calories_burned} ккал.\n"
-    "- Баланс: {balance} ккал."
+    "- Потреблено: {food} ккал из {calories_goal} ккал.\n"
+    "- Сожжено: {workout} ккал.\n"
+    "- Баланс: {food_left} ккал."
 )
-
+CHECK_PROGRESS_ERROR = "Не удалось получить статистику за сегодня. Пожалуйста, попробуйте еще раз."
 # Button strings
 CREATE_PROFILE_BUTTON_LABEL = "Создать профиль"
 BACK_BUTTON_LABEL = "Назад"
@@ -88,3 +88,8 @@ EDIT_PROFILE_BUTTON_LABEL = "Редактировать профиль"
 DELETE_PROFILE_BUTTON_LABEL = "Удалить профиль"
 SKIP_BUTTON_LABEL = "Пропустить"
 UPDATE_GOALS_BUTTON_LABEL = "Обновить цели"
+
+LOG_WATER_BUTTON_LABEL = "Попил"
+LOG_FOOD_BUTTON_LABEL = "Поел"
+LOG_WORKOUT_BUTTON_LABEL = "Потренировался"
+DAILY_STATISTICS_BUTTON_LABEL = "Дневная статистика"

@@ -21,3 +21,12 @@ class User(BaseSchema):
     @field_validator("gender")
     def transform_gender(cls, v):
         return GENDER_MAN if v == "M" else GENDER_WOMAN
+
+
+class UserStatistic(BaseSchema):
+    user_id: int
+    water: float
+    food: float
+    workout: float
+    water_left: float
+    food_left: float

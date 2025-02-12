@@ -9,3 +9,4 @@ class GoalsService:
         base_calories = 10 * weight + 6.25 * height - 5 * age
         activity_calories = activity_level * 200
         return base_calories + activity_calories
+

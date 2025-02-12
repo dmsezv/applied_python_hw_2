@@ -14,7 +14,7 @@ from handlers.user_profile_handlers import view_profile_handler, delete_profile_
 from handlers.common_handlers import start_handler
 from strings import (
     CREATE_PROFILE_BUTTON_LABEL, SHOW_PROFILE_BUTTON_LABEL,
-    DELETE_PROFILE_BUTTON_LABEL, EDIT_PROFILE_BUTTON_LABEL, 
+    DELETE_PROFILE_BUTTON_LABEL, EDIT_PROFILE_BUTTON_LABEL,
     UPDATE_GOALS_BUTTON_LABEL
 )
 

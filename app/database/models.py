@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, Float
+from sqlalchemy import Column, Integer, String, DateTime, Float, ForeignKey
 from database.db import Base
 from datetime import datetime
 
@@ -16,5 +16,16 @@ class User(Base):
     gender = Column(String)
     water_goal = Column(Float)
     calories_goal = Column(Float)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class Statistics(Base):
+    __tablename__ = "statistics"
+
+    user_id = Column(Integer, ForeignKey("users.id"))
+    water = Column(Float)
+    food = Column(Float)
+    workout = Column(Float)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

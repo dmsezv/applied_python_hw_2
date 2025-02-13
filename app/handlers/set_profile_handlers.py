@@ -11,21 +11,21 @@ from strings import (
     GENDER_TEXT_SAVED, GENDER_TYPE_ERROR, GENDER_MAN, GENDER_WOMAN, 
     CITY_ERROR, CITY_WEATHER_IN_PROGRESS
 )
-from components.buttons import MAN_WOMAN_INLINE_BUTTONS, MAIN_MENU_BUTTONS
+from components.buttons import MAN_WOMAN_INLINE_BUTTONS, MAIN_MENU_BUTTONS, CANCEL_BUTTON
 from services.user_service import UserService
 from services.goals_service import GoalsService
 from services.weather_service import WeatherService
-
-
-WEIGHT, HEIGHT, AGE, ACTIVITY, CITY, GENDER = range(6)
+from states import (
+    WEIGHT, HEIGHT, AGE, ACTIVITY, CITY, GENDER
+)
 
 
 async def set_profile_start(update: Update, context: CallbackContext) -> int:
     username = update.message.from_user.username
     context.user_data["username"] = username
     message = f"{HELLO_TEXT.format(username=username)}\n\n{WEIGHT_TEXT}"
-    await update.message.reply_text(message)
-    context.user_data["current_state"] = WEIGHT
+    reply_markup = ReplyKeyboardMarkup(CANCEL_BUTTON)
+    await update.message.reply_text(message, reply_markup=reply_markup)
     return WEIGHT
 
 
@@ -41,7 +41,6 @@ async def weight_handler(update: Update, context: CallbackContext) -> int:
 
     context.user_data["weight"] = update.message.text
     await update.message.reply_text(WEIGHT_TEXT_SAVED.format(weight=update.message.text))
-    context.user_data["current_state"] = HEIGHT
     return HEIGHT
 
 
@@ -57,7 +56,6 @@ async def height_handler(update: Update, context: CallbackContext) -> int:
 
     context.user_data["height"] = update.message.text
     await update.message.reply_text(HEIGHT_TEXT_SAVED.format(height=update.message.text))
-    context.user_data["current_state"] = AGE
     return AGE
 
 
@@ -73,7 +71,6 @@ async def age_handler(update: Update, context: CallbackContext) -> int:
 
     context.user_data["age"] = update.message.text
     await update.message.reply_text(AGE_TEXT_SAVED.format(age=update.message.text))
-    context.user_data["current_state"] = ACTIVITY
     return ACTIVITY
 
 
@@ -89,7 +86,6 @@ async def activity_handler(update: Update, context: CallbackContext) -> int:
 
     context.user_data["activity"] = update.message.text
     await update.message.reply_text(ACTIVITY_TEXT_SAVED.format(activity=update.message.text))
-    context.user_data["current_state"] = CITY
     return CITY
 
 
@@ -121,7 +117,6 @@ async def city_handler(update: Update, context: CallbackContext) -> int:
         ),
         reply_markup=reply_markup
     )
-    context.user_data["current_state"] = GENDER
     return GENDER
 
 
@@ -153,7 +148,7 @@ async def gender_handler(update: Update, context: CallbackContext) -> int:
             await query.message.reply_text(PROFILE_ERROR)
             return GENDER
 
-        reply_markup = ReplyKeyboardMarkup(MAIN_MENU_BUTTONS, one_time_keyboard=True)
+        reply_markup = ReplyKeyboardMarkup(MAIN_MENU_BUTTONS)
         await query.message.reply_text(PROFILE_UPDATED.format(
             temperature=context.user_data["temperature"],
             city=context.user_data["city"],
@@ -179,7 +174,8 @@ def update_user_profile(update: Update, context: CallbackContext) -> int:
         weight=float(context.user_data["weight"]),
         height=float(context.user_data["height"]),
         age=int(context.user_data["age"]),
-        activity_level=int(context.user_data["activity"])
+        activity_level=int(context.user_data["activity"]),
+        gender="male" if context.user_data["gender"] == "M" else "female"
     )
 
     return UserService().update_user(
@@ -191,5 +187,6 @@ def update_user_profile(update: Update, context: CallbackContext) -> int:
         city=context.user_data["city"],
         gender=context.user_data["gender"],
         water_goal=water_goal,
-        calories_goal=calories_goal
+        calories_goal=calories_goal,
+        temperature=context.user_data["temperature"]
     )

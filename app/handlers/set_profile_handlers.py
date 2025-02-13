@@ -154,7 +154,7 @@ async def gender_handler(update: Update, context: CallbackContext) -> int:
             await query.message.reply_text(PROFILE_ERROR)
             return GENDER
 
-        reply_markup = ReplyKeyboardMarkup(MAIN_MENU_BUTTONS, one_time_keyboard=True)
+        reply_markup = ReplyKeyboardMarkup(MAIN_MENU_BUTTONS)
         await query.message.reply_text(PROFILE_UPDATED.format(
             temperature=context.user_data["temperature"],
             city=context.user_data["city"],
@@ -180,7 +180,8 @@ def update_user_profile(update: Update, context: CallbackContext) -> int:
         weight=float(context.user_data["weight"]),
         height=float(context.user_data["height"]),
         age=int(context.user_data["age"]),
-        activity_level=int(context.user_data["activity"])
+        activity_level=int(context.user_data["activity"]),
+        gender="male" if context.user_data["gender"] == "M" else "female"
     )
 
     return UserService().update_user(
@@ -192,5 +193,6 @@ def update_user_profile(update: Update, context: CallbackContext) -> int:
         city=context.user_data["city"],
         gender=context.user_data["gender"],
         water_goal=water_goal,
-        calories_goal=calories_goal
+        calories_goal=calories_goal,
+        temperature=context.user_data["temperature"]
     )

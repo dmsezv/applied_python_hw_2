@@ -15,23 +15,6 @@ class StatisticsService:
                 return session.execute(stmt).scalar_one_or_none()
             return None
 
-    def update_user_statistics(self, user_username: str, water: float, food: float, workout: float) -> UserStatistic:
-        with get_session() as session:
-            stmt = select(UserModel).where(UserModel.username == user_username)
-            user = session.execute(stmt).scalar_one_or_none()
-            if user:
-                stmt = select(StatisticsModel).where(StatisticsModel.user_id == user.id)
-                statistics = session.execute(stmt).scalar_one_or_none()
-                if statistics:
-                    statistics.water = water
-                    statistics.food = food
-                    statistics.workout = workout
-                    statistics.updated_at = datetime.utcnow()
-                    session.commit()
-                    session.refresh(statistics)
-                    return UserStatistic(**statistics.__dict__)
-            return None
-
     def get_daily_statistics(self, user_username: str) -> (UserStatistic, User):
         with get_session() as session:
             stmt = select(UserModel).where(UserModel.username == user_username)
@@ -99,4 +82,38 @@ class StatisticsService:
                 return True
             except Exception as e:
                 print(f"Ошибка при добавлении продукта в статистику: {e}")
+                return False
+
+    def add_workout_to_statistics(self, username, calories_burned):
+        with get_session() as session:
+            try:
+                user = session.execute(select(UserModel).where(UserModel.username == username)).scalar_one()
+                if not user:
+                    return False
+                today_start = datetime.combine(date.today(), datetime.min.time())
+                today_end = datetime.combine(date.today(), datetime.max.time())
+                stmt = select(StatisticsModel).where(
+                    StatisticsModel.user_id == user.id,
+                    StatisticsModel.created_at >= today_start,
+                    StatisticsModel.created_at <= today_end
+                )
+                statistics = session.execute(stmt).scalar_one_or_none()
+                if statistics:
+                    statistics.workout += calories_burned
+                    session.commit()
+                else:
+                    statistics = StatisticsModel(
+                        user_id=user.id,
+                        food=0,
+                        water=0,
+                        workout=calories_burned,
+                        updated_at=datetime.now(),
+                        created_at=datetime.now()
+                    )
+                    session.add(statistics)
+                    session.commit()
+                    session.refresh(statistics)
+                return True
+            except Exception as e:
+                print(f"Ошибка при добавлении тренировки в статистику: {e}")
                 return False

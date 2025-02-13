@@ -75,7 +75,8 @@ async def update_goals_handler(update: Update, context: CallbackContext):
             weight=user.weight,
             height=user.height,
             age=user.age,
-            activity_level=user.activity
+            activity_level=user.activity,
+            gender=user.gender
         )
 
         user = UserService().update_user(
@@ -87,7 +88,8 @@ async def update_goals_handler(update: Update, context: CallbackContext):
             city=user.city,
             gender=user.gender,
             water_goal=water_goal,
-            calories_goal=calories_goal
+            calories_goal=calories_goal,
+            temperature=temperature
         )
 
         if user is None:

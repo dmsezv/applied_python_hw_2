@@ -17,6 +17,7 @@ class User(BaseSchema):
     gender: str
     water_goal: float
     calories_goal: float
+    temperature: float
 
     @field_validator("gender")
     def transform_gender(cls, v):

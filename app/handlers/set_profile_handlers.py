@@ -15,9 +15,9 @@ from components.buttons import MAN_WOMAN_INLINE_BUTTONS, MAIN_MENU_BUTTONS, CANC
 from services.user_service import UserService
 from services.goals_service import GoalsService
 from services.weather_service import WeatherService
-
-
-WEIGHT, HEIGHT, AGE, ACTIVITY, CITY, GENDER = range(6)
+from states import (
+    WEIGHT, HEIGHT, AGE, ACTIVITY, CITY, GENDER
+)
 
 
 async def set_profile_start(update: Update, context: CallbackContext) -> int:
@@ -26,7 +26,6 @@ async def set_profile_start(update: Update, context: CallbackContext) -> int:
     message = f"{HELLO_TEXT.format(username=username)}\n\n{WEIGHT_TEXT}"
     reply_markup = ReplyKeyboardMarkup(CANCEL_BUTTON)
     await update.message.reply_text(message, reply_markup=reply_markup)
-    context.user_data["current_state"] = WEIGHT
     return WEIGHT
 
 
@@ -42,7 +41,6 @@ async def weight_handler(update: Update, context: CallbackContext) -> int:
 
     context.user_data["weight"] = update.message.text
     await update.message.reply_text(WEIGHT_TEXT_SAVED.format(weight=update.message.text))
-    context.user_data["current_state"] = HEIGHT
     return HEIGHT
 
 
@@ -58,7 +56,6 @@ async def height_handler(update: Update, context: CallbackContext) -> int:
 
     context.user_data["height"] = update.message.text
     await update.message.reply_text(HEIGHT_TEXT_SAVED.format(height=update.message.text))
-    context.user_data["current_state"] = AGE
     return AGE
 
 
@@ -74,7 +71,6 @@ async def age_handler(update: Update, context: CallbackContext) -> int:
 
     context.user_data["age"] = update.message.text
     await update.message.reply_text(AGE_TEXT_SAVED.format(age=update.message.text))
-    context.user_data["current_state"] = ACTIVITY
     return ACTIVITY
 
 
@@ -90,7 +86,6 @@ async def activity_handler(update: Update, context: CallbackContext) -> int:
 
     context.user_data["activity"] = update.message.text
     await update.message.reply_text(ACTIVITY_TEXT_SAVED.format(activity=update.message.text))
-    context.user_data["current_state"] = CITY
     return CITY
 
 
@@ -122,7 +117,6 @@ async def city_handler(update: Update, context: CallbackContext) -> int:
         ),
         reply_markup=reply_markup
     )
-    context.user_data["current_state"] = GENDER
     return GENDER
 
 

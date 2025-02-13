@@ -7,10 +7,7 @@ from handlers.set_profile_handlers import (
     set_profile_start, weight_handler, height_handler, age_handler,
     activity_handler, city_handler, gender_handler
 )
-from handlers.set_profile_handlers import WEIGHT, HEIGHT, AGE, ACTIVITY, CITY, GENDER
-
 from handlers.user_profile_handlers import view_profile_handler, delete_profile_handler, update_goals_handler
-
 from handlers.statistics_handlers import (
     start_statistics_handler, get_daily_statistics_handler,
     get_workout_handler,
@@ -19,14 +16,13 @@ from handlers.statistics_handlers import (
     set_water_handler, add_water_handler,
     get_graphics_handler
 )
-from handlers.statistics_handlers import (
-    FOOD_GET, FOOD_SET, FOOD_ADD, FOOD_CALORIES_COUNT,
-    WORKOUT_GET, WORKOUT_SET, WORKOUT_ADD, WORKOUT_MINUTES,
+from handlers.common_handlers import start_handler, main_menu_handler
+from states import (
+    WEIGHT, HEIGHT, AGE, ACTIVITY, CITY, GENDER,
+    FOOD_SET, FOOD_ADD, FOOD_CALORIES_COUNT,
+    WORKOUT_SET, WORKOUT_ADD,
     WATER_SET, WATER_ADD
 )
-
-from handlers.common_handlers import start_handler, main_menu_handler
-
 from strings import (
     CREATE_PROFILE_BUTTON_LABEL, SHOW_PROFILE_BUTTON_LABEL,
     DELETE_PROFILE_BUTTON_LABEL, EDIT_PROFILE_BUTTON_LABEL,
@@ -114,10 +110,6 @@ def main():
         ],
         states={
             # FOOD
-            FOOD_GET: [
-                MessageHandler(filters.Regex(f"^{CANCEL_BUTTON_LABEL}$"), start_statistics_handler),
-                MessageHandler(filters.TEXT & ~filters.COMMAND, get_food_handler),
-            ],
             FOOD_SET: [
                 MessageHandler(filters.Regex(f"^{CANCEL_BUTTON_LABEL}$"), start_statistics_handler),
                 MessageHandler(filters.TEXT & ~filters.COMMAND, set_food_handler),
@@ -132,19 +124,11 @@ def main():
                 MessageHandler(filters.TEXT & ~filters.COMMAND, get_calories_count_handler),
             ],
             # WORKOUT
-            WORKOUT_GET: [
-                MessageHandler(filters.Regex(f"^{CANCEL_BUTTON_LABEL}$"), start_statistics_handler),
-                MessageHandler(filters.TEXT & ~filters.COMMAND, get_workout_handler),
-            ],
             WORKOUT_SET: [
                 MessageHandler(filters.Regex(f"^{CANCEL_BUTTON_LABEL}$"), start_statistics_handler),
                 MessageHandler(filters.TEXT & ~filters.COMMAND, set_workout_handler),
             ],
             WORKOUT_ADD: [
-                MessageHandler(filters.Regex(f"^{CANCEL_BUTTON_LABEL}$"), start_statistics_handler),
-                MessageHandler(filters.TEXT & ~filters.COMMAND, add_workout_handler),
-            ],
-            WORKOUT_MINUTES: [
                 MessageHandler(filters.Regex(f"^{CANCEL_BUTTON_LABEL}$"), start_statistics_handler),
                 MessageHandler(filters.TEXT & ~filters.COMMAND, add_workout_handler),
             ],

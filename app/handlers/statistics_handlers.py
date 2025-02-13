@@ -24,12 +24,12 @@ from components.buttons import (
 )
 from services.goals_service import GoalsService
 from services.graphics_generator_service import GraphicsGeneratorService
+from states import (
+    FOOD_SET, FOOD_ADD, FOOD_CALORIES_COUNT,
+    WORKOUT_SET, WORKOUT_ADD,
+    WATER_ADD
+)
 from datetime import date
-
-
-FOOD_GET, FOOD_SET, FOOD_ADD, FOOD_CALORIES_COUNT = range(4)
-WORKOUT_GET, WORKOUT_SET, WORKOUT_MINUTES, WORKOUT_ADD = range(4)
-WATER_SET, WATER_ADD = range(2)
 
 
 async def start_statistics_handler(update: Update, context: CallbackContext):
@@ -60,7 +60,6 @@ async def get_daily_statistics_handler(update: Update, context: CallbackContext)
         )
     else:
         await update.message.reply_text(CHECK_PROGRESS_ERROR)
-
     return ConversationHandler.END
 
 
@@ -154,9 +153,8 @@ async def set_workout_handler(update: Update, context: CallbackContext):
     else:
         await update.message.reply_text(BACK_BUTTON_LABEL, reply_markup=keyboard_statistics)
         return ConversationHandler.END
-
     await update.message.reply_text(WORKOUT_MINUTES_TEXT, reply_markup=keyboard_cancel)
-    return WORKOUT_MINUTES
+    return WORKOUT_ADD
 
 
 async def add_workout_handler(update: Update, context: CallbackContext):
@@ -166,10 +164,10 @@ async def add_workout_handler(update: Update, context: CallbackContext):
         workout_minutes = float(update.message.text)
         if workout_minutes <= 0:
             await update.message.reply_text(WORKOUT_ZERO_ERROR)
-            return WORKOUT_MINUTES
+            return WORKOUT_ADD
     except ValueError:
         await update.message.reply_text(WORKOUT_TYPE_ERROR)
-        return WORKOUT_MINUTES
+        return WORKOUT_ADD
 
     user = UserService().get_user(update.message.from_user.username)
     if not user:
@@ -196,8 +194,8 @@ async def add_workout_handler(update: Update, context: CallbackContext):
     ):
         await update.message.reply_text(
             WORKOUT_ADD_TEXT.format(
-                water_needed=water_needed,
-                calories_burned=calories_burned
+                water_needed=f"{water_needed:.2f}",
+                calories_burned=f"{calories_burned:.2f}"
             ),
             reply_markup=keyboard
         )
@@ -246,7 +244,6 @@ async def get_graphics_handler(update: Update, context: CallbackContext):
     if not chart:
         await update.message.reply_text(GRAPHICS_ERROR_TEXT)
         return ConversationHandler.END
-
     await update.message.reply_photo(photo=chart)
     context.user_data.clear()
     return ConversationHandler.END

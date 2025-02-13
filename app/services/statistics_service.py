@@ -37,7 +37,9 @@ class StatisticsService:
                         food=statistics.food,
                         workout=statistics.workout,
                         water_left=water_left,
-                        food_left=calories_left
+                        food_left=calories_left,
+                        created_at=statistics.created_at,
+                        updated_at=statistics.updated_at
                     ), User(**user.__dict__)
                 else:
                     return UserStatistic(
@@ -46,7 +48,9 @@ class StatisticsService:
                         food=0,
                         workout=0,
                         water_left=user.water_goal,
-                        food_left=user.calories_goal
+                        food_left=user.calories_goal,
+                        created_at=datetime.now(),
+                        updated_at=datetime.now()
                     ), User(**user.__dict__)
             return None, None
 

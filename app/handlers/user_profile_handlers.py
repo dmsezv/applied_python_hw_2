@@ -9,8 +9,6 @@ from strings import (
     UPDATE_GOALS_TEXT, UPDATE_GOALS_SUCCESS, UPDATE_GOALS_ERROR
 )
 
-SHOW_PROFILE, DELETE_PROFILE = range(2)
-
 
 async def view_profile_handler(update: Update, context: CallbackContext):
     username = update.message.from_user.username

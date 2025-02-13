@@ -1,5 +1,6 @@
 from pydantic import BaseModel, field_validator
 from strings import GENDER_MAN, GENDER_WOMAN
+from datetime import datetime
 
 
 class BaseSchema(BaseModel):
@@ -31,7 +32,8 @@ class UserStatistic(BaseSchema):
     workout: float
     water_left: float
     food_left: float
-
+    created_at: datetime
+    updated_at: datetime
 
 class Food(BaseSchema):
     request: str

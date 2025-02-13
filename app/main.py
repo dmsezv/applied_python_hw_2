@@ -16,7 +16,8 @@ from handlers.statistics_handlers import (
     get_workout_handler,
     get_food_handler, set_food_handler, add_food_handler, get_calories_count_handler,
     set_workout_handler, add_workout_handler,
-    set_water_handler, add_water_handler
+    set_water_handler, add_water_handler,
+    get_graphics_handler
 )
 from handlers.statistics_handlers import (
     FOOD_GET, FOOD_SET, FOOD_ADD, FOOD_CALORIES_COUNT,
@@ -32,7 +33,8 @@ from strings import (
     UPDATE_GOALS_BUTTON_LABEL, STATISTICS_BUTTON_LABEL, BACK_BUTTON_LABEL,
     DAILY_STATISTICS_BUTTON_LABEL,
     LOG_FOOD_BUTTON_LABEL, LOG_WORKOUT_BUTTON_LABEL, LOG_WATER_BUTTON_LABEL,
-    CANCEL_BUTTON_LABEL,
+    GRAPHICS_BUTTON_LABEL,
+    CANCEL_BUTTON_LABEL
 )
 
 
@@ -107,6 +109,7 @@ def main():
             MessageHandler(filters.Regex(f"^{LOG_FOOD_BUTTON_LABEL}$"), get_food_handler),
             MessageHandler(filters.Regex(f"^{LOG_WATER_BUTTON_LABEL}$"), set_water_handler),
             MessageHandler(filters.Regex(f"^{LOG_WORKOUT_BUTTON_LABEL}$"), get_workout_handler),
+            MessageHandler(filters.Regex(f"^{GRAPHICS_BUTTON_LABEL}$"), get_graphics_handler),
             MessageHandler(filters.Regex(f"^{BACK_BUTTON_LABEL}$"), main_menu_handler),
         ],
         states={

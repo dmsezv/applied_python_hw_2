@@ -2,7 +2,7 @@ from database.db import get_session
 from database.models import User as UserModel, Statistics as StatisticsModel
 from schemas.models import UserStatistic, User
 from sqlalchemy import select
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 
 
 class StatisticsService:
@@ -150,5 +150,29 @@ class StatisticsService:
                     session.refresh(statistics)
                 return True
             except Exception as e:
-                print(f"Ошибка при добавлении тренировки в статистику: {e}")
+                print(f"Ошибка при добавлении воды в статистику: {e}")
                 return False
+
+    def get_weekly_statistics(self, username):
+        with get_session() as session:
+            user = session.execute(select(UserModel).where(UserModel.username == username)).scalar_one()
+            if not user:
+                return None
+            today = datetime.today()
+            week_ago = today - timedelta(days=7)
+            stmt = select(StatisticsModel).where(
+                StatisticsModel.user_id == user.id,
+                StatisticsModel.created_at >= week_ago,
+                StatisticsModel.created_at <= today
+            ).order_by(StatisticsModel.created_at)
+            statistics = session.execute(stmt).scalars().all()
+            return [UserStatistic(
+                user_id=user.id,
+                water=stat.water,
+                food=stat.food,
+                workout=stat.workout,
+                water_left=user.water_goal - stat.water,
+                food_left=user.calories_goal - (stat.food - stat.workout),
+                created_at=stat.created_at,
+                updated_at=stat.updated_at
+            ) for stat in statistics]

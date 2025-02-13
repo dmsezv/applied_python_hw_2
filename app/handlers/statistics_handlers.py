@@ -12,7 +12,8 @@ from strings import (
     RUN_BUTTON_LABEL, CYCLE_BUTTON_LABEL, SWIM_BUTTON_LABEL, PLANK_BUTTON_LABEL,
     GYM_BUTTON_LABEL, KLIMBING_BUTTON_LABEL, USER_NOT_FOUND_TEXT,
     WATER_GET_TEXT, WATER_ADD_TEXT, WATER_NOT_ADDED_ERROR_TEXT, WATER_ZERO_ERROR, WATER_TYPE_ERROR,
-    WORKOUT_MINUTES_TEXT, BACK_BUTTON_LABEL
+    WORKOUT_MINUTES_TEXT, BACK_BUTTON_LABEL,
+    GRAPHICS_IN_PROGRESS_TEXT, GRAPHICS_ERROR_TEXT
 )
 from services.food_service import FoodService
 from services.user_service import UserService
@@ -22,6 +23,7 @@ from components.buttons import (
     STATISTICS_MENU_BUTTONS, WORKOUT_MENU_BUTTONS,
 )
 from services.goals_service import GoalsService
+from services.graphics_generator_service import GraphicsGeneratorService
 from datetime import date
 
 
@@ -231,5 +233,20 @@ async def add_water_handler(update: Update, context: CallbackContext):
         await update.message.reply_text(WATER_ADD_TEXT.format(water_needed=water_amount), reply_markup=keyboard)
     else:
         await update.message.reply_text(WATER_NOT_ADDED_ERROR_TEXT, reply_markup=keyboard)
+    context.user_data.clear()
+    return ConversationHandler.END
+
+
+async def get_graphics_handler(update: Update, context: CallbackContext):
+    await update.message.reply_text(GRAPHICS_IN_PROGRESS_TEXT)
+
+    username = update.message.from_user.username
+    graphics_generator_service = GraphicsGeneratorService()
+    chart = graphics_generator_service.generate_weekly_charts(username)
+    if not chart:
+        await update.message.reply_text(GRAPHICS_ERROR_TEXT)
+        return ConversationHandler.END
+
+    await update.message.reply_photo(photo=chart)
     context.user_data.clear()
     return ConversationHandler.END

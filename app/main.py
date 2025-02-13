@@ -13,13 +13,15 @@ from handlers.user_profile_handlers import view_profile_handler, delete_profile_
 
 from handlers.statistics_handlers import (
     start_statistics_handler, get_daily_statistics_handler,
-    get_workout_handler, get_water_handler,
+    get_workout_handler,
     get_food_handler, set_food_handler, add_food_handler, get_calories_count_handler,
-    set_workout_handler, add_workout_handler
+    set_workout_handler, add_workout_handler,
+    set_water_handler, add_water_handler
 )
 from handlers.statistics_handlers import (
     FOOD_GET, FOOD_SET, FOOD_ADD, FOOD_CALORIES_COUNT,
-    WORKOUT_GET, WORKOUT_SET, WORKOUT_ADD, WORKOUT_MINUTES
+    WORKOUT_GET, WORKOUT_SET, WORKOUT_ADD, WORKOUT_MINUTES,
+    WATER_SET, WATER_ADD
 )
 
 from handlers.common_handlers import start_handler, main_menu_handler
@@ -103,7 +105,7 @@ def main():
             MessageHandler(filters.Regex(f"^{STATISTICS_BUTTON_LABEL}$"), start_statistics_handler),
             MessageHandler(filters.Regex(f"^{DAILY_STATISTICS_BUTTON_LABEL}$"), get_daily_statistics_handler),
             MessageHandler(filters.Regex(f"^{LOG_FOOD_BUTTON_LABEL}$"), get_food_handler),
-            MessageHandler(filters.Regex(f"^{LOG_WATER_BUTTON_LABEL}$"), get_water_handler),
+            MessageHandler(filters.Regex(f"^{LOG_WATER_BUTTON_LABEL}$"), set_water_handler),
             MessageHandler(filters.Regex(f"^{LOG_WORKOUT_BUTTON_LABEL}$"), get_workout_handler),
             MessageHandler(filters.Regex(f"^{BACK_BUTTON_LABEL}$"), main_menu_handler),
         ],
@@ -142,6 +144,15 @@ def main():
             WORKOUT_MINUTES: [
                 MessageHandler(filters.Regex(f"^{CANCEL_BUTTON_LABEL}$"), start_statistics_handler),
                 MessageHandler(filters.TEXT & ~filters.COMMAND, add_workout_handler),
+            ],
+            # WATER
+            WATER_SET: [
+                MessageHandler(filters.Regex(f"^{CANCEL_BUTTON_LABEL}$"), start_statistics_handler),
+                MessageHandler(filters.TEXT & ~filters.COMMAND, set_water_handler),
+            ],
+            WATER_ADD: [
+                MessageHandler(filters.Regex(f"^{CANCEL_BUTTON_LABEL}$"), start_statistics_handler),
+                MessageHandler(filters.TEXT & ~filters.COMMAND, add_water_handler),
             ],
         },
         fallbacks=[

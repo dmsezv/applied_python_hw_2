@@ -84,7 +84,7 @@ class StatisticsService:
                 print(f"Ошибка при добавлении продукта в статистику: {e}")
                 return False
 
-    def add_workout_to_statistics(self, username, calories_burned):
+    def add_workout_to_statistics(self, username, calories_burned, water_burned):
         with get_session() as session:
             try:
                 user = session.execute(select(UserModel).where(UserModel.username == username)).scalar_one()
@@ -100,13 +100,48 @@ class StatisticsService:
                 statistics = session.execute(stmt).scalar_one_or_none()
                 if statistics:
                     statistics.workout += calories_burned
+                    statistics.water -= water_burned
                     session.commit()
                 else:
                     statistics = StatisticsModel(
                         user_id=user.id,
                         food=0,
-                        water=0,
+                        water=-water_burned,
                         workout=calories_burned,
+                        updated_at=datetime.now(),
+                        created_at=datetime.now()
+                    )
+                    session.add(statistics)
+                    session.commit()
+                    session.refresh(statistics)
+                return True
+            except Exception as e:
+                print(f"Ошибка при добавлении тренировки в статистику: {e}")
+                return False
+
+    def add_water_to_statistics(self, username, water_amount):
+        with get_session() as session:
+            try:
+                user = session.execute(select(UserModel).where(UserModel.username == username)).scalar_one()
+                if not user:
+                    return False
+                today_start = datetime.combine(date.today(), datetime.min.time())
+                today_end = datetime.combine(date.today(), datetime.max.time())
+                stmt = select(StatisticsModel).where(
+                    StatisticsModel.user_id == user.id,
+                    StatisticsModel.created_at >= today_start,
+                    StatisticsModel.created_at <= today_end
+                )
+                statistics = session.execute(stmt).scalar_one_or_none()
+                if statistics:
+                    statistics.water += water_amount
+                    session.commit()
+                else:
+                    statistics = StatisticsModel(
+                        user_id=user.id,
+                        food=0,
+                        water=water_amount,
+                        workout=0,
                         updated_at=datetime.now(),
                         created_at=datetime.now()
                     )

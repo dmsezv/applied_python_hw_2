@@ -11,6 +11,7 @@ from strings import (
     WORKOUT_GET_TEXT, WORKOUT_ADD_TEXT, WORKOUT_ZERO_ERROR, WORKOUT_TYPE_ERROR,
     RUN_BUTTON_LABEL, CYCLE_BUTTON_LABEL, SWIM_BUTTON_LABEL, PLANK_BUTTON_LABEL,
     GYM_BUTTON_LABEL, KLIMBING_BUTTON_LABEL, USER_NOT_FOUND_TEXT,
+    WATER_GET_TEXT, WATER_ADD_TEXT, WATER_NOT_ADDED_ERROR_TEXT, WATER_ZERO_ERROR, WATER_TYPE_ERROR,
     WORKOUT_MINUTES_TEXT, BACK_BUTTON_LABEL
 )
 from services.food_service import FoodService
@@ -26,6 +27,7 @@ from datetime import date
 
 FOOD_GET, FOOD_SET, FOOD_ADD, FOOD_CALORIES_COUNT = range(4)
 WORKOUT_GET, WORKOUT_SET, WORKOUT_MINUTES, WORKOUT_ADD = range(4)
+WATER_SET, WATER_ADD = range(2)
 
 
 async def start_statistics_handler(update: Update, context: CallbackContext):
@@ -41,12 +43,13 @@ async def get_daily_statistics_handler(update: Update, context: CallbackContext)
 
     if statistics:
         food_left = user.calories_goal - (statistics.food + statistics.workout)
+        water_left = user.water_goal - statistics.water
         await update.message.reply_text(
             CHECK_PROGRESS.format(
                 date=date.today().strftime("%d.%m.%Y"),
                 water=statistics.water,
                 water_goal=user.water_goal,
-                water_left=statistics.water_left,
+                water_left=f"{water_left:.2f}",
                 workout=f"{statistics.workout:.2f}",
                 food=f"{statistics.food:.2f}",
                 calories_goal=f"{user.calories_goal:.2f}",
@@ -186,7 +189,8 @@ async def add_workout_handler(update: Update, context: CallbackContext):
     statistics_service = StatisticsService()
     if statistics_service.add_workout_to_statistics(
         update.message.from_user.username,
-        calories_burned
+        calories_burned,
+        water_needed
     ):
         await update.message.reply_text(
             WORKOUT_ADD_TEXT.format(
@@ -201,6 +205,31 @@ async def add_workout_handler(update: Update, context: CallbackContext):
     return ConversationHandler.END
 
 
-async def get_water_handler(update: Update, context: CallbackContext):
-    pass
+async def set_water_handler(update: Update, context: CallbackContext):
+    keyboard = ReplyKeyboardMarkup(CANCEL_BUTTON)
+    await update.message.reply_text(WATER_GET_TEXT, reply_markup=keyboard)
+    return WATER_ADD
 
+
+async def add_water_handler(update: Update, context: CallbackContext):
+    keyboard = ReplyKeyboardMarkup(STATISTICS_MENU_BUTTONS)
+
+    try:
+        water_amount = float(update.message.text)
+        if water_amount <= 0:
+            await update.message.reply_text(WATER_ZERO_ERROR)
+            return WATER_ADD
+    except ValueError:
+        await update.message.reply_text(WATER_TYPE_ERROR)
+        return WATER_ADD
+
+    statistics_service = StatisticsService()
+    if statistics_service.add_water_to_statistics(
+        update.message.from_user.username,
+        water_amount
+    ):
+        await update.message.reply_text(WATER_ADD_TEXT.format(water_needed=water_amount), reply_markup=keyboard)
+    else:
+        await update.message.reply_text(WATER_NOT_ADDED_ERROR_TEXT, reply_markup=keyboard)
+    context.user_data.clear()
+    return ConversationHandler.END
